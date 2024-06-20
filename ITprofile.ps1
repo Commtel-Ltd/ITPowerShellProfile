@@ -1,32 +1,30 @@
 # PowerShell Profile Script
 
-# Function to check for updates from GitHub
-function Check-ForUpdates {
-    $repoOwner = "YourGitHubUsername"  # Replace with your GitHub username or organization
-    $repoName = "YourRepoName"         # Replace with your repository name
-    $scriptFile = "YourScriptName.ps1" # Replace with the name of your script file in the repository
-    $localScriptPath = "$PROFILE"
-    $apiUrl = "https://api.github.com/repos/$repoOwner/$repoName/contents/$scriptFile"
+# Path to your local Git repository
+$repoPath = "gh repo clone Commtel-Ltd/ITPowerShellProfile"
 
-    try {
-        $response = Invoke-RestMethod -Uri $apiUrl -UseBasicParsing
-        $remoteContent = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($response.content))
-        $localContent = Get-Content -Path $localScriptPath -Raw
+# Navigate to the repository
+Set-Location -Path $repoPath
 
-        if ($remoteContent -ne $localContent) {
-            Write-Output "A new version of the profile script is available. Updating..."
-            $remoteContent | Set-Content -Path $localScriptPath
-            Write-Output "Profile script updated. Please restart PowerShell to apply changes."
-        } else {
-            Write-Output "Profile script is up-to-date."
-        }
-    } catch {
-        Write-Output "Failed to check for updates: $_"
-    }
+# Fetch the latest changes from the remote repository
+git fetch origin
+
+# Get the current branch name
+$currentBranch = git rev-parse --abbrev-ref HEAD
+
+# Check for new commits on the remote repository
+$localCommit = git rev-parse $currentBranch
+$remoteCommit = git rev-parse origin/$currentBranch
+
+if ($localCommit -ne $remoteCommit) {
+    Write-Host "New commits detected. Pulling the latest changes..."
+    git pull origin $currentBranch
+} else {
+    Write-Host "No new commits. Your repository is up to date."
 }
 
-# Run the update check function when PowerShell starts
-Check-ForUpdates
+# Navigate back to the original directory
+Set-Location -Path $HOME
 
 # Function to run DISM tool
 function Invoke-DISM {
@@ -81,40 +79,3 @@ function Invoke-CHKDSK {
     chkdsk /f /r
 }
 Set-Alias chkdskfix Invoke-CHKDSK
-
-# Function to display the readme file
-function Show-Readme {
-    $readmePath = "$HOME\it_tools_readme.txt"
-    if (Test-Path $readmePath) {
-        Get-Content $readmePath | Out-Host
-    } else {
-        Write-Output "Readme file not found."
-    }
-}
-Set-Alias showreadme Show-Readme
-
-# Create a readme file with instructions
-$readmeContent = @"
-IT Tools PowerShell Profile
-============================
-
-This PowerShell profile contains functions and aliases for various IT-related tasks.
-
-Functions and their aliases:
-1. Invoke-DISM (alias: dismfix) - Runs DISM to restore health.
-2. Invoke-SFC (alias: sfcfix) - Runs SFC to scan and repair system files.
-3. Reset-IP (alias: ipreset) - Resets the IP stack.
-4. Release-IP (alias: iprelease) - Releases the current IP address.
-5. Renew-IP (alias: iprenew) - Renews the IP address.
-6. Flush-DNS (alias: dnsflush) - Flushes the DNS cache.
-7. Reset-Winsock (alias: winsockreset) - Resets the Winsock catalog.
-8. Restart-ComputerNow (alias: restartnow) - Restarts the computer immediately.
-9. Invoke-CHKDSK (alias: chkdskfix) - Runs CHKDSK with /f and /r flags.
-10. Show-Readme (alias: showreadme) - Displays this readme file.
-
-Ensure this profile script is deployed on the target machines to make these functions available universally.
-"@
-
-# Save the readme file to the user's home directory
-$readmePath = "$HOME\it_tools_readme.txt"
-Set-Content -Path $readmePath -Value $readmeContent
