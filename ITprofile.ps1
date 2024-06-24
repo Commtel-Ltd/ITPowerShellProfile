@@ -1,27 +1,34 @@
 # PowerShell Profile Script
 
-# Path to your local Git repository
-$repoPath = "gh repo clone Commtel-Ltd/ITPowerShellProfile"
+# Define the path to the custom directory for storing the profile script and readme
+$customPath = Join-Path $env:USERPROFILE "Documents\PowerShell"
 
-# Navigate to the repository
-Set-Location -Path $repoPath
+# Define the local git repository path
+$repoPath = Join-Path $customPath "ITPowerShellProfile"  # Replace 'YourRepoName' with the actual repo name
 
-# Fetch the latest changes from the remote repository
-git fetch origin
-
-# Get the current branch name
-$currentBranch = git rev-parse --abbrev-ref HEAD
-
-# Check for new commits on the remote repository
-$localCommit = git rev-parse $currentBranch
-$remoteCommit = git rev-parse origin/$currentBranch
-
-if ($localCommit -ne $remoteCommit) {
-    Write-Host "New commits detected. Pulling the latest changes..."
-    git pull origin $currentBranch
-} else {
-    Write-Host "No new commits. Your repository is up to date."
+# Function to check for updates using Git
+function Check-ForUpdates {
+    if (-not (Test-Path $repoPath)) {
+        Write-Output "Local repository not found. Cloning repository..."
+        git clone https://github.com/Commtel-Ltd/ITPowerShellProfile.git $repoPath
+    } else {
+        Write-Output "Checking for updates in the repository..."
+        Set-Location -Path $repoPath
+        git fetch origin
+        $localCommit = git rev-parse HEAD
+        $remoteCommit = git rev-parse origin/main  # Assuming the main branch is used
+        if ($localCommit -ne $remoteCommit) {
+            Write-Output "Updates found. Pulling the latest changes..."
+            git pull origin main
+            Write-Output "Profile script updated. Please restart PowerShell to apply changes."
+        } else {
+            Write-Output "Profile script is up-to-date."
+        }
+    }
 }
+
+# Run the update check function when PowerShell starts
+Check-ForUpdates
 
 # Navigate back to the original directory
 Set-Location -Path $HOME
