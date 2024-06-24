@@ -10,7 +10,7 @@ $repoPath = $customPath
 function Check-ForUpdates {
     if (-not (Test-Path $repoPath)) {
         Write-Output "Local repository not found. Cloning repository..."
-        git clone git@github.com:Commtel-Ltd/ITPowerShellProfile.git $repoPath
+        git clone https://github.com/Commtel-Ltd/ITPowerShellProfile.git $repoPath
     } else {
         Write-Output "Checking for updates in the repository..."
         Set-Location -Path $repoPath
@@ -29,9 +29,6 @@ function Check-ForUpdates {
 
 # Run the update check function when PowerShell starts
 Check-ForUpdates
-
-# Navigate back to the original directory
-Set-Location -Path $HOME
 
 # Function to run DISM tool
 function Invoke-DISM {
@@ -86,3 +83,22 @@ function Invoke-CHKDSK {
     chkdsk /f /r
 }
 Set-Alias chkdskfix Invoke-CHKDSK
+
+# Function to display the readme file
+function Show-Readme {
+    $readmePath = Join-Path $customPath "README.md"
+    if (Test-Path $readmePath) {
+        Get-Content $readmePath | Out-Host
+    } else {
+        Write-Output "README.md file not found."
+    }
+}
+Set-Alias showreadme Show-Readme
+
+# Create the custom directory if it doesn't exist
+if (-not (Test-Path -Path $customPath)) {
+    New-Item -ItemType Directory -Path $customPath -Force
+}
+
+# Change back to the original directory
+Set-Location -Path $customPath
