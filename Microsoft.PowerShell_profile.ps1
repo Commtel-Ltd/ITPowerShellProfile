@@ -10,7 +10,7 @@ $repoPath = $customPath
 function Check-ForUpdates {
     if (-not (Test-Path $repoPath)) {
         Write-Output "Local repository not found. Cloning repository..."
-        git clone https://github.com/Commtel-Ltd/ITPowerShellProfile.git $repoPath
+        git clone https://github.com/YourGitHubUsername/YourRepoName.git $repoPath
     } else {
         Write-Output "Checking for updates in the repository..."
         Set-Location -Path $repoPath
@@ -19,7 +19,12 @@ function Check-ForUpdates {
         $remoteCommit = git rev-parse origin/main  # Assuming the main branch is used
         if ($localCommit -ne $remoteCommit) {
             Write-Output "Updates found. Pulling the latest changes..."
+            # Stash any local changes
+            git stash save -u "Auto stash before pulling updates"
+            # Pull the latest changes
             git pull origin main
+            # Apply the stashed changes
+            git stash pop
             Write-Output "Profile script updated. Please restart PowerShell to apply changes."
         } else {
             Write-Output "Profile script is up-to-date."
