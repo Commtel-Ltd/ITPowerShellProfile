@@ -1,16 +1,16 @@
 # PowerShell Profile Script
 
 # Define the path to the custom directory for storing the profile script and readme
-$customPath = Join-Path $env:USERPROFILE "Documents\PowerShell"
+$customPath = Join-Path $env:USERPROFILE "\OneDrive - Commtel Ltd T A Telguard\Documents\PowerShell"
 
 # Define the local git repository path
-$repoPath = Join-Path $customPath "ITPowerShellProfile"  # Replace 'YourRepoName' with the actual repo name
+$repoPath = $customPath
 
 # Function to check for updates using Git
 function Check-ForUpdates {
     if (-not (Test-Path $repoPath)) {
         Write-Output "Local repository not found. Cloning repository..."
-        git clone https://github.com/Commtel-Ltd/ITPowerShellProfile.git $repoPath
+        git clone git@github.com:Commtel-Ltd/ITPowerShellProfile.git $repoPath
     } else {
         Write-Output "Checking for updates in the repository..."
         Set-Location -Path $repoPath
