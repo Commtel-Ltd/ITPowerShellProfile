@@ -9,8 +9,17 @@ $repoPath = $customPath
 # Function to check for updates using Git
 function Check-ForUpdates {
     if (-not (Test-Path "$repoPath\.git")) {
-        Write-Output "Local repository not found. Cloning repository..."
-        git clone https://github.com/Commtel-Ltd/ITPowerShellProfile.git $repoPath
+        if (-not (Test-Path $repoPath)) {
+            Write-Output "Local repository not found. Cloning repository..."
+            git clone https://github.com/Commtel-Ltd/ITPowerShellProfile.git $repoPath
+        } else {
+            Write-Output "Directory exists but is not a Git repository. Initializing as a Git repository..."
+            Set-Location -Path $repoPath
+            git init
+            git remote add origin https://github.com/Commtel-Ltd/ITPowerShellProfile.git
+            git fetch origin
+            git reset --hard origin/main
+        }
     } else {
         Write-Output "Checking for updates in the repository..."
         Set-Location -Path $repoPath
@@ -107,4 +116,5 @@ if (-not (Test-Path -Path $customPath)) {
 
 # Change back to the original directory
 Set-Location -Path $customPath
+
 
